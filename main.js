@@ -1,37 +1,125 @@
 /* ═══════════════════════════════════════════════
-   main.js — Music Artist Homepage
+   main.js — Music Artist Homepage + Supabase
    ═══════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════
+   🔧 Supabase 設定
+══════════════════════════════════════ */
+const SUPABASE_URL  = 'https://qfubgkknldxuucxrwnmv.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmdWJna2tubGR4dXVjeHJ3bm12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzOTM2NzcsImV4cCI6MjA5MDk2OTY3N30.7k5LX9jidq97vC3MELEDfpldfjuncMnBRXxQfZXZ9jE';
+
+// Supabase REST APIヘルパー
+const SB = {
+  headers: {
+    'apikey': SUPABASE_ANON,
+    'Authorization': `Bearer ${SUPABASE_ANON}`,
+    'Content-Type': 'application/json',
+  },
+
+  // DBからカード一覧取得
+  async getCards() {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/cards?order=added_at.desc`,
+      { headers: this.headers }
+    );
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+
+  // DBにカード追加
+  async insertCard(data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/cards`, {
+      method: 'POST',
+      headers: { ...this.headers, 'Prefer': 'return=representation' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+
+  // DBからカード削除
+  async deleteCard(id) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/cards?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: this.headers,
+    });
+    if (!res.ok) throw new Error(await res.text());
+  },
+
+  // DBのカード更新（音楽変更用）
+  async updateCard(id, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/cards?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { ...this.headers, 'Prefer': 'return=representation' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
+
+  // Storageにファイルをアップロード
+  async uploadFile(bucket, path, file) {
+    const res = await fetch(
+      `${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`,
+      {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON,
+          'Authorization': `Bearer ${SUPABASE_ANON}`,
+          'Content-Type': file.type,
+          'x-upsert': 'true',
+        },
+        body: file,
+      }
+    );
+    if (!res.ok) throw new Error(await res.text());
+    // 公開URLを返す
+    return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
+  },
+};
 
 /* ══════════════════════════════════════
    定数・状態
 ══════════════════════════════════════ */
-const ADMIN_ID  = 'admin';
-const ADMIN_PW  = 'music1234';
-const PER_PAGE  = 30; // 5列 × 6行
+const ADMIN_ID = 'admin';
+const ADMIN_PW = 'music1234';
+const PER_PAGE = 30;
 
-let isAdmin       = false;
-let currentPage   = 1;
-let cards         = [];  // { imgUrl, audioObj, trackName, addedAt }
-let currentAudio  = null;
+let isAdmin      = false;
+let currentPage  = 1;
+let cards        = [];   // DBから取得したカードデータ
+let audioCache   = {};   // { card.id: Audio オブジェクト }
+let currentAudio = null;
 let currentPlayBtn = null;
 
 /* ══════════════════════════════════════
-   🚀 起動処理
-   URL に ?admin が含まれていたら
-   管理者ログインモーダルを開く
+   🚀 起動
 ══════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('year').textContent = new Date().getFullYear();
-  renderGallery();
 
-  // ?admin または ?admin=xxx でアクセスされたらモーダルを開く
+  showLoading(true);
+  try {
+    await loadCards();
+  } catch (e) {
+    console.error('Supabase接続エラー:', e);
+    showToast('データの読み込みに失敗しました', 'error');
+  }
+  showLoading(false);
+
   if (location.search.includes('admin')) {
     openAdminLoginModal();
   }
 });
 
+/* ── カードをDBから読み込む ── */
+async function loadCards() {
+  cards = await SB.getCards();
+  renderGallery();
+}
+
 /* ══════════════════════════════════════
-   🔐 管理者ログインモーダル
+   🔐 管理者ログイン
 ══════════════════════════════════════ */
 function openAdminLoginModal() {
   document.getElementById('modal-admin-login').classList.add('active');
@@ -44,7 +132,6 @@ document.getElementById('admin-pw').addEventListener('keydown', e => {
 });
 document.getElementById('btn-admin-cancel').addEventListener('click', () => {
   document.getElementById('modal-admin-login').classList.remove('active');
-  // URL から ?admin を除去してきれいにする
   history.replaceState(null, '', location.pathname);
 });
 
@@ -59,18 +146,16 @@ function doAdminLogin() {
     document.getElementById('admin-error').textContent = '';
     document.getElementById('admin-id').value = '';
     document.getElementById('admin-pw').value = '';
-    // URL をきれいにする
     history.replaceState(null, '', location.pathname);
-    renderGallery(); // 管理者ボタンを再表示
+    renderGallery();
+    showToast('管理者モードでログインしました');
   } else {
-    const err = document.getElementById('admin-error');
-    err.textContent = 'IDまたはパスワードが違います';
+    document.getElementById('admin-error').textContent = 'IDまたはパスワードが違います';
     document.getElementById('admin-pw').value = '';
     document.getElementById('admin-pw').focus();
   }
 }
 
-// ログアウト
 document.getElementById('btn-logout').addEventListener('click', () => {
   if (!confirm('管理者モードを終了しますか？')) return;
   isAdmin = false;
@@ -81,7 +166,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
 });
 
 /* ══════════════════════════════════════
-   🖼️ GALLERY
+   🖼️ GALLERY レンダリング
 ══════════════════════════════════════ */
 document.getElementById('add-card-btn').addEventListener('click', openModal);
 
@@ -89,10 +174,8 @@ function renderGallery() {
   const grid = document.getElementById('gallery-grid');
   grid.innerHTML = '';
 
-  // 新しく追加した順（降順）
-  const sorted = [...cards].sort((a, b) => b.addedAt - a.addedAt);
-  const total  = sorted.length;
-  const pages  = Math.max(1, Math.ceil(total / PER_PAGE));
+  const total = cards.length;
+  const pages = Math.max(1, Math.ceil(total / PER_PAGE));
   if (currentPage > pages) currentPage = pages;
 
   if (total === 0) {
@@ -107,7 +190,7 @@ function renderGallery() {
   }
 
   const start = (currentPage - 1) * PER_PAGE;
-  sorted.slice(start, start + PER_PAGE).forEach(d => grid.appendChild(buildCard(d)));
+  cards.slice(start, start + PER_PAGE).forEach(d => grid.appendChild(buildCard(d)));
   renderPagination(pages, currentPage);
 }
 
@@ -115,11 +198,17 @@ function renderGallery() {
 function buildCard(data) {
   const card     = document.createElement('div');
   card.className = 'gallery-card';
-  const hasAudio = !!data.audioObj;
+  const hasAudio = !!data.audio_url;
+
+  // Audio オブジェクトをキャッシュ（ページ再描画でも維持）
+  if (hasAudio && !audioCache[data.id]) {
+    audioCache[data.id] = new Audio(data.audio_url);
+  }
+  const audioObj = audioCache[data.id] || null;
 
   card.innerHTML = `
     <div class="gc-img">
-      <img src="${data.imgUrl}" alt="${data.trackName}" loading="lazy" />
+      <img src="${data.img_url}" alt="${data.track_name}" loading="lazy" />
       <div class="gc-img-ov">拡大</div>
     </div>
     <div class="gc-player">
@@ -128,7 +217,7 @@ function buildCard(data) {
           <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
         </button>
         <div class="gc-info">
-          <div class="gc-name">${hasAudio ? data.trackName : '— 音楽未設定 —'}</div>
+          <div class="gc-name">${hasAudio ? data.track_name : '— 音楽未設定 —'}</div>
           <div class="gc-dur">${hasAudio ? '0:00' : ''}</div>
         </div>
       </div>
@@ -139,69 +228,89 @@ function buildCard(data) {
       ` : ''}
     </div>`;
 
-  // 画像 → ライトボックス
-  card.querySelector('.gc-img').addEventListener('click', () => openLightbox(data.imgUrl));
+  card.querySelector('.gc-img').addEventListener('click', () => openLightbox(data.img_url));
 
   const playBtn = card.querySelector('.gc-play-btn');
   const bar     = card.querySelector('.gc-bar');
   const barWrap = card.querySelector('.gc-bar-wrap');
   const durEl   = card.querySelector('.gc-dur');
 
-  if (hasAudio) {
+  if (hasAudio && audioObj) {
     const syncDur = () => {
-      if (!isNaN(data.audioObj.duration)) durEl.textContent = formatTime(data.audioObj.duration);
+      if (!isNaN(audioObj.duration)) durEl.textContent = formatTime(audioObj.duration);
     };
     syncDur();
-    data.audioObj.addEventListener('loadedmetadata', syncDur);
-    data.audioObj.addEventListener('timeupdate', () => {
-      bar.style.width = (data.audioObj.currentTime / data.audioObj.duration * 100) + '%';
+    audioObj.addEventListener('loadedmetadata', syncDur);
+    audioObj.addEventListener('timeupdate', () => {
+      bar.style.width = (audioObj.currentTime / audioObj.duration * 100) + '%';
     });
-    data.audioObj.addEventListener('ended', () => {
+    audioObj.addEventListener('ended', () => {
       setPlayIcon(playBtn); bar.style.width = '0%';
     });
   }
 
   // 再生ボタン
   playBtn.addEventListener('click', () => {
-    if (!hasAudio) return;
-    if (currentAudio && currentAudio !== data.audioObj) {
+    if (!hasAudio || !audioObj) return;
+    if (currentAudio && currentAudio !== audioObj) {
       currentAudio.pause();
       if (currentPlayBtn) setPlayIcon(currentPlayBtn);
     }
-    if (data.audioObj.paused) {
-      data.audioObj.play();
+    if (audioObj.paused) {
+      audioObj.play();
       setPauseIcon(playBtn);
-      currentAudio   = data.audioObj;
+      currentAudio   = audioObj;
       currentPlayBtn = playBtn;
     } else {
-      data.audioObj.pause();
+      audioObj.pause();
       setPlayIcon(playBtn);
     }
   });
 
-  // シークバー
   barWrap.addEventListener('click', e => {
-    if (!hasAudio || !data.audioObj.duration) return;
+    if (!hasAudio || !audioObj?.duration) return;
     const r = barWrap.getBoundingClientRect();
-    data.audioObj.currentTime = ((e.clientX - r.left) / r.width) * data.audioObj.duration;
+    audioObj.currentTime = ((e.clientX - r.left) / r.width) * audioObj.duration;
   });
 
-  // 管理者：音楽紐付け
-  card.querySelector('.gc-attach-btn')?.addEventListener('click', () => {
-    pickFile('audio/*', f => {
-      if (data.audioObj) data.audioObj.pause();
-      data.audioObj  = new Audio(URL.createObjectURL(f));
-      data.trackName = f.name.replace(/\.[^/.]+$/, '');
-      renderGallery();
+  // 管理者：音楽紐付け・変更
+  card.querySelector('.gc-attach-btn')?.addEventListener('click', async () => {
+    pickFile('audio/*', async f => {
+      showLoading(true);
+      try {
+        const path    = `audio/${Date.now()}_${f.name}`;
+        const audioUrl = await SB.uploadFile('media', path, f);
+        const trackName = f.name.replace(/\.[^/.]+$/, '');
+        await SB.updateCard(data.id, { audio_url: audioUrl, track_name: trackName });
+
+        // キャッシュ更新
+        if (audioCache[data.id]) audioCache[data.id].pause();
+        delete audioCache[data.id];
+
+        await loadCards();
+        showToast('音楽を保存しました ✓');
+      } catch (e) {
+        console.error(e);
+        showToast('保存に失敗しました', 'error');
+      }
+      showLoading(false);
     });
   });
 
   // 管理者：削除
-  card.querySelector('.gc-del-btn')?.addEventListener('click', () => {
+  card.querySelector('.gc-del-btn')?.addEventListener('click', async () => {
     if (!confirm('このカードを削除しますか？')) return;
-    if (data.audioObj) data.audioObj.pause();
-    cards = cards.filter(c => c !== data);
-    renderGallery();
+    showLoading(true);
+    try {
+      if (audioCache[data.id]) { audioCache[data.id].pause(); delete audioCache[data.id]; }
+      await SB.deleteCard(data.id);
+      await loadCards();
+      showToast('削除しました ✓');
+    } catch (e) {
+      console.error(e);
+      showToast('削除に失敗しました', 'error');
+    }
+    showLoading(false);
   });
 
   return card;
@@ -240,12 +349,14 @@ function scrollToGallery() {
 /* ══════════════════════════════════════
    📦 ADD CARD MODAL
 ══════════════════════════════════════ */
+let modalImgFile   = null;
 let modalImgUrl    = null;
-let modalAudioObj  = null;
+let modalAudioFile = null;
 let modalAudioName = '未選択';
 
 function openModal() {
-  modalImgUrl = null; modalAudioObj = null; modalAudioName = '未選択';
+  modalImgFile = null; modalImgUrl = null;
+  modalAudioFile = null; modalAudioName = '未選択';
 
   const area = document.getElementById('modal-img-area');
   area.innerHTML = `
@@ -259,7 +370,8 @@ function openModal() {
     </button>`;
   document.getElementById('modal-img-btn').addEventListener('click', () =>
     pickFile('image/*', f => {
-      modalImgUrl = URL.createObjectURL(f);
+      modalImgFile = f;
+      modalImgUrl  = URL.createObjectURL(f);
       area.innerHTML = `<img src="${modalImgUrl}" style="width:100%;height:100%;object-fit:cover;display:block" />`;
     })
   );
@@ -269,7 +381,7 @@ function openModal() {
 
 document.getElementById('modal-audio-btn').addEventListener('click', () =>
   pickFile('audio/*', f => {
-    modalAudioObj  = new Audio(URL.createObjectURL(f));
+    modalAudioFile = f;
     modalAudioName = f.name.replace(/\.[^/.]+$/, '');
     document.getElementById('modal-audio-name').textContent = modalAudioName;
   })
@@ -279,32 +391,47 @@ document.getElementById('modal-cancel').addEventListener('click', () =>
   document.getElementById('modal-add').classList.remove('active')
 );
 
-document.getElementById('modal-save').addEventListener('click', () => {
-  if (!modalImgUrl) { alert('画像を選択してください'); return; }
-  cards.unshift({ imgUrl: modalImgUrl, audioObj: modalAudioObj, trackName: modalAudioName, addedAt: Date.now() });
-  currentPage = 1;
-  document.getElementById('modal-add').classList.remove('active');
-  renderGallery();
+document.getElementById('modal-save').addEventListener('click', async () => {
+  if (!modalImgFile) { alert('画像を選択してください'); return; }
 
-  // 最初の画像をヒーロー背景に
-  const hero = document.getElementById('hero-img');
-  if (!hero.src || hero.src === location.href) hero.src = modalImgUrl;
+  document.getElementById('modal-add').classList.remove('active');
+  showLoading(true);
+
+  try {
+    // 1. 画像をStorageにアップロード
+    const imgPath = `images/${Date.now()}_${modalImgFile.name}`;
+    const imgUrl  = await SB.uploadFile('media', imgPath, modalImgFile);
+
+    // 2. 音楽があればアップロード
+    let audioUrl   = null;
+    let trackName  = '音楽未設定';
+    if (modalAudioFile) {
+      const audioPath = `audio/${Date.now()}_${modalAudioFile.name}`;
+      audioUrl  = await SB.uploadFile('media', audioPath, modalAudioFile);
+      trackName = modalAudioName;
+    }
+
+    // 3. DBに保存
+    await SB.insertCard({ img_url: imgUrl, audio_url: audioUrl, track_name: trackName });
+
+    // 4. 最初の画像をヒーロー背景に
+    const hero = document.getElementById('hero-img');
+    if (!hero.src || hero.src === location.href) hero.src = imgUrl;
+
+    currentPage = 1;
+    await loadCards();
+    showToast('保存しました ✓');
+  } catch (e) {
+    console.error(e);
+    showToast('保存に失敗しました。Supabaseの設定を確認してください。', 'error');
+  }
+
+  showLoading(false);
 });
 
 document.getElementById('modal-add').addEventListener('click', e => {
   if (e.target === e.currentTarget) document.getElementById('modal-add').classList.remove('active');
 });
-
-/* ── ファイル選択ヘルパー ── */
-function pickFile(accept, callback) {
-  const input = document.createElement('input');
-  input.type = 'file'; input.accept = accept;
-  input.addEventListener('change', e => {
-    const f = e.target.files[0];
-    if (f) callback(f);
-  });
-  input.click();
-}
 
 /* ══════════════════════════════════════
    🔍 LIGHTBOX
@@ -331,6 +458,40 @@ function setPauseIcon(btn) {
 }
 function formatTime(s) {
   return `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`;
+}
+
+/* ── ファイル選択ヘルパー ── */
+function pickFile(accept, callback) {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = accept;
+  input.addEventListener('change', e => { const f = e.target.files[0]; if (f) callback(f); });
+  input.click();
+}
+
+/* ══════════════════════════════════════
+   ⏳ ローディング・トースト UI
+══════════════════════════════════════ */
+function showLoading(show) {
+  let el = document.getElementById('loading-overlay');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'loading-overlay';
+    el.innerHTML = '<div class="loading-spinner"></div>';
+    document.body.appendChild(el);
+  }
+  el.style.display = show ? 'flex' : 'none';
+}
+
+function showToast(msg, type = 'success') {
+  let el = document.getElementById('toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.className = `toast toast--${type} toast--show`;
+  setTimeout(() => el.classList.remove('toast--show'), 3000);
 }
 
 /* ══════════════════════════════════════

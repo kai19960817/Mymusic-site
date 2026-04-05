@@ -355,6 +355,39 @@ footer a { color: var(--accent); text-decoration: none; }
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ══════════════════════════════════════
+   ⏳ LOADING OVERLAY
+══════════════════════════════════════ */
+#loading-overlay {
+  position: fixed; inset: 0; z-index: 600;
+  background: rgba(26,36,32,.75);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.loading-spinner {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  animation: spin .8s linear infinite;
+}
+
+/* ══════════════════════════════════════
+   🍞 TOAST
+══════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(2rem);
+  z-index: 700; padding: .75rem 1.6rem; border-radius: 999px;
+  font-size: .78rem; letter-spacing: .06em;
+  opacity: 0; transition: opacity .3s, transform .3s;
+  pointer-events: none; white-space: nowrap;
+}
+.toast--success { background: var(--accent); color: #0a0a0f; }
+.toast--error   { background: #f87171;       color: #fff; }
+.toast--show    { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ══════════════════════════════════════
    RESPONSIVE
