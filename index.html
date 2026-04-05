@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARTIST — Music</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     🌐 MAIN SITE（直接表示）
+══════════════════════════════════════ -->
+<div id="screen-site" class="screen active">
+
+  <nav>
+    <span class="nav-logo">Artist</span>
+    <ul class="nav-links">
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#social">SNS</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <span class="admin-badge" id="admin-badge">🎛 管理者モード</span>
+      <button class="btn btn-ghost btn-sm admin-only" id="btn-logout">ログアウト</button>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-bg">
+      <img id="hero-img" class="hero-bg-img" src="" alt="" />
+      <div class="hero-bg-gradient"></div>
+    </div>
+    <p class="hero-label">Music Artist</p>
+    <h1>Your <em>Sound</em></h1>
+    <p class="hero-sub">アーティスト名と自己紹介文をここに入力してください。</p>
+    <div class="hero-cta">
+      <a href="#gallery" class="btn btn-primary">Listen Now</a>
+      <a href="#social" class="btn btn-ghost">Follow Me</a>
+    </div>
+  </div>
+
+  <!-- ══════════ GALLERY ══════════ -->
+  <section id="gallery">
+    <p class="section-label">Photos &amp; Music</p>
+    <div class="gallery-header">
+      <h2 class="section-title">Gallery</h2>
+      <button class="btn btn-primary btn-sm admin-only" id="add-card-btn">＋ 追加</button>
+    </div>
+    <div class="pagination" id="pag-top"></div>
+    <div class="gallery-grid" id="gallery-grid">
+      <p class="gallery-empty" id="gallery-empty">まだコンテンツがありません。</p>
+    </div>
+    <div class="pagination" id="pag-bot"></div>
+    <input type="file" id="image-file-input" accept="image/*" style="display:none" />
+  </section>
+
+  <!-- ══════════ SNS ══════════ -->
+  <section id="social">
+    <p class="section-label">Connect</p>
+    <h2 class="section-title">SNS &amp; Links</h2>
+    <div class="sns-grid">
+
+      <div class="sns-card">
+        <div class="sns-card-header">
+          <span class="sns-icon yt"><svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg></span>
+          <span class="sns-card-name">YouTube</span>
+        </div>
+        <div class="sns-card-body" id="yt-embed-area">
+          <div class="sns-input-row admin-only"><input class="sns-input" id="yt-url" placeholder="YouTube動画URLを貼り付け" /><button class="sns-btn" onclick="embedYoutube()">埋め込み</button></div>
+          <p class="sns-ph viewer-only">動画未設定</p>
+        </div>
+      </div>
+
+      <div class="sns-card">
+        <div class="sns-card-header">
+          <span class="sns-icon ig"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.3.2 4.8 1.7 5 5 .1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.2 3.3-1.7 4.8-5 5-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-3.3-.2-4.8-1.7-5-5C2 16.6 2 16.2 2 12s0-3.6.1-4.9c.2-3.3 1.7-4.8 5-5C8.4 2.2 8.8 2.2 12 2.2zm0-2.2C8.7 0 8.3 0 7 .1 2.7.3.3 2.7.1 7 0 8.3 0 8.7 0 12c0 3.3 0 3.7.1 5 .2 4.3 2.6 6.7 7 6.9 1.3.1 1.7.1 5 .1 3.3 0 3.7 0 5-.1 4.3-.2 6.7-2.6 6.9-7 .1-1.3.1-1.7.1-5 0-3.3 0-3.7-.1-5-.2-4.3-2.6-6.7-7-6.9C15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.8a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8z"/></svg></span>
+          <span class="sns-card-name">Instagram</span>
+        </div>
+        <div class="sns-card-body">
+          <div class="sns-input-row admin-only"><input class="sns-input" id="ig-url" placeholder="Instagram URL" /><button class="sns-btn" onclick="openSNS('ig-url')">開く</button></div>
+          <p class="sns-ph viewer-only">リンク未設定</p>
+        </div>
+      </div>
+
+      <div class="sns-card">
+        <div class="sns-card-header">
+          <span class="sns-icon sp"><svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.7 0 12 0zm5.5 17.3c-.2.4-.7.5-1 .2-2.8-1.7-6.4-2.1-10.5-1.1-.4.1-.8-.1-.9-.5-.1-.4.1-.8.5-.9 4.5-1 8.5-.6 11.6 1.3.4.2.5.7.3 1zm1.5-3.3c-.3.5-.9.6-1.3.3-3.2-2-8.1-2.6-11.9-1.4-.5.1-1-.1-1.1-.6-.1-.5.1-1 .6-1.1 4.4-1.3 9.8-.7 13.4 1.6.4.3.6.9.3 1.2zm.1-3.4C15.6 8.1 9.7 7.9 6 9c-.6.2-1.2-.2-1.4-.7-.2-.6.2-1.2.7-1.4C9.8 5.6 16.3 5.8 20 8.3c.5.3.7 1 .4 1.5-.3.5-1 .7-1.3.8z"/></svg></span>
+          <span class="sns-card-name">Spotify</span>
+        </div>
+        <div class="sns-card-body" id="sp-embed-area">
+          <div class="sns-input-row admin-only"><input class="sns-input" id="sp-url" placeholder="Spotify URL" /><button class="sns-btn" onclick="embedSpotify()">埋め込み</button></div>
+          <p class="sns-ph viewer-only">楽曲未設定</p>
+        </div>
+      </div>
+
+      <div class="sns-card">
+        <div class="sns-card-header">
+          <span class="sns-icon tw"><svg viewBox="0 0 24 24"><path d="M18.3 1.4h3.4l-7.4 8.5 8.7 11.7H15l-5.3-7-6.1 7H0.2l7.9-9L0 1.4h7.4l4.8 6.4 5.7-6.4zm-1.2 18h1.9L7 3.4H4.9l12.2 16z"/></svg></span>
+          <span class="sns-card-name">X (Twitter)</span>
+        </div>
+        <div class="sns-card-body">
+          <div class="sns-input-row admin-only"><input class="sns-input" id="tw-url" placeholder="X URL" /><button class="sns-btn" onclick="openSNS('tw-url')">開く</button></div>
+          <p class="sns-ph viewer-only">リンク未設定</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="contact" style="text-align:center;max-width:560px">
+    <p class="section-label">Get in Touch</p>
+    <h2 class="section-title">Contact</h2>
+    <p style="color:var(--muted);font-size:.85rem;line-height:1.7;margin-bottom:1.5rem;">コラボレーション・ライブのご依頼はこちらから。</p>
+    <a href="mailto:kaifarronclaire@gmail.com" class="btn btn-primary">メールを送る</a>
+  </section>
+
+  <footer>
+    <p>© <span id="year"></span> <a href="#">Artist Name</a> — All rights reserved.</p>
+  </footer>
+
+</div><!-- /#screen-site -->
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="" />
+</div>
+
+<!-- ADD CARD MODAL（管理者用） -->
+<div class="modal" id="modal-add">
+  <div class="modal-box">
+    <h3 class="modal-title">新しいカードを追加</h3>
+    <div class="modal-img-area" id="modal-img-area">
+      <button class="modal-img-btn" id="modal-img-btn">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>画像を選択（必須）</span>
+      </button>
+    </div>
+    <input type="file" id="modal-img-input" accept="image/*" style="display:none" />
+    <div class="modal-audio-row">
+      <button class="btn btn-ghost btn-sm" id="modal-audio-btn">🎵 音楽を選択（任意）</button>
+      <span class="modal-audio-name" id="modal-audio-name">未選択</span>
+    </div>
+    <input type="file" id="modal-audio-input" accept="audio/*" style="display:none" />
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modal-cancel">キャンセル</button>
+      <button class="btn btn-primary" id="modal-save">追加する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 管理者ログインモーダル（?adminアクセス時のみ表示） -->
+<div class="modal" id="modal-admin-login">
+  <div class="modal-box">
+    <p style="font-size:1.4rem;text-align:center;margin-bottom:.5rem">🎛</p>
+    <h3 class="modal-title" style="text-align:center">管理者ログイン</h3>
+    <div class="form-group" style="margin-top:1.2rem">
+      <label class="form-label">ユーザーID</label>
+      <input class="form-input" id="admin-id" type="text" placeholder="admin" autocomplete="username" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">パスワード</label>
+      <input class="form-input" id="admin-pw" type="password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <p class="form-error" id="admin-error"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-admin-cancel">キャンセル</button>
+      <button class="btn btn-primary" id="btn-admin-submit">ログイン</button>
+    </div>
+    <p class="login-hint" style="margin-top:1rem;text-align:center">ID: <code>admin</code> / PW: <code>music1234</code></p>
+  </div>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>
