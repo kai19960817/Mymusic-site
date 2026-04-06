@@ -549,7 +549,7 @@ function applyYoutube(url) {
   } else {
     // チャンネルURL → リンクボタン
     area.innerHTML = `
-      <a href="${url}" target="_blank" rel="noopener" class="sns-link-btn viewer-only">
+      <a href="${url}" target="_blank" rel="noopener" class="sns-link-btn">
         YouTube チャンネルを開く →
       </a>
       <button class="sns-btn admin-only" style="margin-top:.6rem;width:100%" onclick="resetYT()">変更</button>`;
@@ -613,16 +613,17 @@ const SNS_KEY_MAP = { 'ig-url': 'instagram', 'tw-url': 'twitter', 'tt-url': 'tik
 const SNS_LABEL   = { 'ig-url': 'Instagram', 'tw-url': 'X',       'tt-url': 'TikTok'  };
 
 function applyExternalLink(prefix, url) {
-  // 閲覧者向けにリンクボタンを表示
   const body = document.querySelector(`#${prefix}-link-area`);
   if (!body) return;
+  const fullUrl = url.startsWith('http') ? url : 'https://' + url;
+  const label   = SNS_LABEL[prefix + '-url'] ?? prefix;
   body.innerHTML = `
-    <a href="${url.startsWith('http') ? url : 'https://'+url}"
-       target="_blank" rel="noopener"
-       class="sns-link-btn viewer-only">${SNS_LABEL[prefix+'-url'] ?? prefix} を開く →</a>
-    <div class="sns-input-row admin-only">
+    <a href="${fullUrl}" target="_blank" rel="noopener" class="sns-link-btn">
+      ${label} を開く →
+    </a>
+    <div class="sns-input-row admin-only" style="margin-top:.6rem">
       <input class="sns-input" id="${prefix}-url" value="${url}" placeholder="URL" />
-      <button class="sns-btn" onclick="saveSNS('${prefix}-url')">保存</button>
+      <button class="sns-btn" onclick="saveSNS('${prefix}-url')">変更</button>
     </div>`;
 }
 
