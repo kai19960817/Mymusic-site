@@ -5,18 +5,18 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* ── ベース（クリーンホワイト） ── */
-  --bg:      #f8f8f6;   /* オフホワイト背景            */
-  --surface: #ffffff;   /* カード・パネル面（純白）     */
-  --border:  #e0e0da;   /* 枠線（薄いグレー）           */
+  /* ── ベース（静かな森の薄緑） ── */
+  --bg:      #dce8dc;   /* 霧がかった森の薄緑          */
+  --surface: #eaf2ea;   /* カード面（もう少し淡い緑）  */
+  --border:  #b8ccb8;   /* 枠線（苔色がかった緑グレー） */
 
   /* ── アクセント ── */
-  --accent:  #4a7c59;   /* 深みのある緑（ボタン等）     */
-  --accent2: #3d6b8a;   /* スレートブルー               */
+  --accent:  #3d6644;   /* 深い森の緑（ボタン等）      */
+  --accent2: #4e7c6a;   /* テール寄りの緑              */
 
   /* ── テキスト ── */
-  --text:    #1e2a24;   /* ほぼ黒（読みやすい濃い緑黒） */
-  --muted:   #7a8c84;   /* グレーグリーン（補助文字）   */
+  --text:    #243020;   /* 木陰のような深い緑黒        */
+  --muted:   #627060;   /* 落ち葉色のグレーグリーン    */
 
   --radius:  12px;
 }
@@ -80,7 +80,7 @@ nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; justify-content: space-between; align-items: center;
   padding: 1rem 2rem;
-  background: rgba(248,248,246,.92);
+  background: rgba(220,232,220,.93);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
@@ -121,9 +121,9 @@ nav {
 .btn:hover { transform: translateY(-2px); }
 .btn-primary {
   background: var(--accent); color: #0a0a0f; font-weight: 600;
-  box-shadow: 0 0 20px rgba(74,124,89,.2);
+  box-shadow: 0 0 20px rgba(61,102,68,.22);
 }
-.btn-primary:hover { box-shadow: 0 0 32px rgba(74,124,89,.35); }
+.btn-primary:hover { box-shadow: 0 0 32px rgba(61,102,68,.38); }
 .btn-ghost {
   background: transparent; color: var(--text);
   border: 1px solid var(--border);
@@ -145,7 +145,7 @@ nav {
 .hero-bg-img { width: 100%; height: 100%; object-fit: cover; opacity: .18; filter: blur(2px); }
 .hero-bg-gradient {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 60%, rgba(61,107,138,.08) 0%, transparent 70%),
+  background: radial-gradient(ellipse at 50% 60%, rgba(61,102,68,.1) 0%, transparent 70%),
               linear-gradient(to bottom, transparent 50%, var(--bg) 100%);
 }
 .hero-label { font-size: .7rem; letter-spacing: .3em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.2rem; position: relative; }
@@ -366,7 +366,7 @@ footer a { color: var(--accent); text-decoration: none; }
 ══════════════════════════════════════ */
 #loading-overlay {
   position: fixed; inset: 0; z-index: 600;
-  background: rgba(248,248,246,.8);
+  background: rgba(220,232,220,.82);
   display: flex; align-items: center; justify-content: center;
   backdrop-filter: blur(4px);
 }
