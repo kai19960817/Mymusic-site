@@ -295,6 +295,8 @@ section { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
 .sns-icon.ig { background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
 .sns-icon.sp { background: #1db954; }
 .sns-icon.tw { background: #1da1f2; }
+.sns-icon.tt { background: #010101; }
+.sns-icon.tt { background: #010101; }
 .sns-card-name { font-size: .85rem; }
 .sns-card-body { padding: 1rem; }
 .sns-embed-frame { width: 100%; border: none; border-radius: 8px; display: block; }
