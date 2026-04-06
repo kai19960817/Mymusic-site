@@ -392,15 +392,70 @@ footer a { color: var(--accent); text-decoration: none; }
 .toast--show    { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ══════════════════════════════════════
-   RESPONSIVE
+   RESPONSIVE（スマホ・タブレット対応）
 ══════════════════════════════════════ */
+
+/* タブレット（〜900px） */
 @media (max-width: 900px) {
   .gallery-grid { grid-template-columns: repeat(3, 1fr); }
+  .hero h1 { font-size: clamp(2.5rem, 8vw, 5rem); }
 }
+
+/* スマホ（〜600px） */
 @media (max-width: 600px) {
-  nav { padding: 1rem 1.2rem; }
-  .nav-links { gap: 1rem; }
-  .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* ナビ */
+  nav {
+    padding: .8rem 1rem;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+  .nav-links { gap: .8rem; }
+  .nav-links a { font-size: .65rem; }
+  .nav-right { gap: .5rem; }
+  .btn-sm { padding: .35rem .8rem; font-size: .62rem; }
+
+  /* ヒーロー */
+  .hero { padding: 5rem 1.2rem 3rem; }
+  .hero h1 { font-size: 2.6rem; }
+  .hero-sub { font-size: .78rem; }
+  .hero-cta { gap: .7rem; }
+  .btn { padding: .6rem 1.4rem; font-size: .7rem; }
+
+  /* セクション */
+  section { padding: 3.5rem 1rem; }
+  .section-title { font-size: 1.6rem; }
+
+  /* ギャラリー：2列 */
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: .6rem; }
+  .gallery-header { flex-direction: column; align-items: flex-start; gap: .8rem; }
+
+  /* ギャラリーカード：テキスト小さめ */
+  .gc-name { font-size: .65rem; }
+  .gc-dur  { font-size: .58rem; }
+  .gc-play-btn { width: 30px; height: 30px; }
+  .gc-play-btn svg { width: 11px; height: 11px; }
+  .gc-player { padding: .55rem .65rem; }
+  .gc-attach-btn, .gc-del-btn { font-size: .55rem; }
+
+  /* SNS */
   .sns-grid { grid-template-columns: 1fr; }
-  section { padding: 4rem 1.2rem; }
+
+  /* モーダル */
+  .modal-box { padding: 1.3rem; margin: 1rem; }
+  .modal-title { font-size: 1.1rem; }
+  .modal-img-area { aspect-ratio: 4/3; }
+
+  /* ページネーション */
+  .page-btn { width: 30px; height: 30px; font-size: .68rem; }
+
+  /* ライトボックス */
+  .lightbox-close { top: 1rem; right: 1rem; width: 34px; height: 34px; font-size: 1rem; }
+}
+
+/* 極小スマホ（〜380px） */
+@media (max-width: 380px) {
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: .4rem; }
+  .hero h1 { font-size: 2.1rem; }
+  .nav-links { display: none; } /* 極小ではナビリンクを非表示 */
 }
