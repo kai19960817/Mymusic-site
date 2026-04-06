@@ -5,18 +5,18 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* ── ベース（深みのある森のグリーン系） ── */
-  --bg:      #1a2420;   /* 深い苔色の背景            */
-  --surface: #22302b;   /* カード・パネル面           */
-  --border:  #344d44;   /* 枠線                      */
+  /* ── ベース（クリーンホワイト） ── */
+  --bg:      #f8f8f6;   /* オフホワイト背景            */
+  --surface: #ffffff;   /* カード・パネル面（純白）     */
+  --border:  #e0e0da;   /* 枠線（薄いグレー）           */
 
   /* ── アクセント ── */
-  --accent:  #8fbc8f;   /* セージグリーン（優しい緑）  */
-  --accent2: #6aab9c;   /* ミントティール              */
+  --accent:  #4a7c59;   /* 深みのある緑（ボタン等）     */
+  --accent2: #3d6b8a;   /* スレートブルー               */
 
   /* ── テキスト ── */
-  --text:    #dde8e2;   /* 白みがかった薄緑（目に優しい） */
-  --muted:   #7a9e90;   /* 抑えた緑グレー（補助文字）    */
+  --text:    #1e2a24;   /* ほぼ黒（読みやすい濃い緑黒） */
+  --muted:   #7a8c84;   /* グレーグリーン（補助文字）   */
 
   --radius:  12px;
 }
@@ -80,7 +80,7 @@ nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; justify-content: space-between; align-items: center;
   padding: 1rem 2rem;
-  background: rgba(22,34,29,.9);
+  background: rgba(248,248,246,.92);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
@@ -121,9 +121,9 @@ nav {
 .btn:hover { transform: translateY(-2px); }
 .btn-primary {
   background: var(--accent); color: #0a0a0f; font-weight: 600;
-  box-shadow: 0 0 20px rgba(143,188,143,.25);
+  box-shadow: 0 0 20px rgba(74,124,89,.2);
 }
-.btn-primary:hover { box-shadow: 0 0 32px rgba(143,188,143,.45); }
+.btn-primary:hover { box-shadow: 0 0 32px rgba(74,124,89,.35); }
 .btn-ghost {
   background: transparent; color: var(--text);
   border: 1px solid var(--border);
@@ -145,7 +145,7 @@ nav {
 .hero-bg-img { width: 100%; height: 100%; object-fit: cover; opacity: .18; filter: blur(2px); }
 .hero-bg-gradient {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 60%, rgba(106,171,156,.12) 0%, transparent 70%),
+  background: radial-gradient(ellipse at 50% 60%, rgba(61,107,138,.08) 0%, transparent 70%),
               linear-gradient(to bottom, transparent 50%, var(--bg) 100%);
 }
 .hero-label { font-size: .7rem; letter-spacing: .3em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.2rem; position: relative; }
@@ -366,7 +366,7 @@ footer a { color: var(--accent); text-decoration: none; }
 ══════════════════════════════════════ */
 #loading-overlay {
   position: fixed; inset: 0; z-index: 600;
-  background: rgba(26,36,32,.75);
+  background: rgba(248,248,246,.8);
   display: flex; align-items: center; justify-content: center;
   backdrop-filter: blur(4px);
 }
