@@ -535,21 +535,30 @@ async function loadSNS() {
 
 /* ── YouTube ── */
 function applyYoutube(url) {
-  const m = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  if (!m) return;
-  document.getElementById('yt-embed-area').innerHTML = `
-    <iframe class="sns-embed-frame" height="195"
-      src="https://www.youtube.com/embed/${m[1]}"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen></iframe>
-    <button class="sns-btn admin-only" style="margin-top:.6rem;width:100%" onclick="resetYT()">変更</button>`;
+  const videoMatch = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  const area = document.getElementById('yt-embed-area');
+
+  if (videoMatch) {
+    // 動画URL → 埋め込み
+    area.innerHTML = `
+      <iframe class="sns-embed-frame" height="195"
+        src="https://www.youtube.com/embed/${videoMatch[1]}"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen></iframe>
+      <button class="sns-btn admin-only" style="margin-top:.6rem;width:100%" onclick="resetYT()">変更</button>`;
+  } else {
+    // チャンネルURL → リンクボタン
+    area.innerHTML = `
+      <a href="${url}" target="_blank" rel="noopener" class="sns-link-btn viewer-only">
+        YouTube チャンネルを開く →
+      </a>
+      <button class="sns-btn admin-only" style="margin-top:.6rem;width:100%" onclick="resetYT()">変更</button>`;
+  }
 }
 
 async function embedYoutube() {
   const url = document.getElementById('yt-url').value.trim();
   if (!url) return;
-  const m = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  if (!m) { alert('正しいYouTube URLを入力してください'); return; }
   showLoading(true);
   try {
     await SB.setSNS('youtube', url);
