@@ -57,7 +57,25 @@ const SB = {
     return res.json();
   },
 
-  // Storageにファイルをアップロード
+  // SNS設定を全件取得
+  async getSNS() {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/sns_settings`,
+      { headers: this.headers }
+    );
+    if (!res.ok) throw new Error(await res.text());
+    return res.json(); // [{ key, value }, ...]
+  },
+
+  // SNS設定を保存（upsert）
+  async setSNS(key, value) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/sns_settings`, {
+      method: 'POST',
+      headers: { ...this.headers, 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ key, value, updated_at: new Date().toISOString() }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+  },
   async uploadFile(bucket, path, file) {
     const res = await fetch(
       `${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`,
@@ -101,6 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   showLoading(true);
   try {
     await loadCards();
+    await loadSNS();
   } catch (e) {
     console.error('Supabase接続エラー:', e);
     showToast('データの読み込みに失敗しました', 'error');
@@ -495,13 +514,29 @@ function showToast(msg, type = 'success') {
 }
 
 /* ══════════════════════════════════════
-   📱 SNS
+   📱 SNS（Supabase永続保存）
 ══════════════════════════════════════ */
-function embedYoutube() {
-  const input = document.getElementById('yt-url').value.trim();
-  if (!input) return;
-  const m = input.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  if (!m) { alert('正しいYouTube URLを入力してください'); return; }
+
+// SNS設定をDBから読み込んで画面に反映
+async function loadSNS() {
+  try {
+    const rows = await SB.getSNS();
+    const map  = Object.fromEntries(rows.map(r => [r.key, r.value]));
+
+    if (map.youtube)   applyYoutube(map.youtube);
+    if (map.spotify)   applySpotify(map.spotify);
+    if (map.instagram) applyExternalLink('ig', map.instagram);
+    if (map.twitter)   applyExternalLink('tw', map.twitter);
+    if (map.tiktok)    applyExternalLink('tt', map.tiktok);
+  } catch (e) {
+    console.error('SNS読み込みエラー:', e);
+  }
+}
+
+/* ── YouTube ── */
+function applyYoutube(url) {
+  const m = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (!m) return;
   document.getElementById('yt-embed-area').innerHTML = `
     <iframe class="sns-embed-frame" height="195"
       src="https://www.youtube.com/embed/${m[1]}"
@@ -509,29 +544,94 @@ function embedYoutube() {
       allowfullscreen></iframe>
     <button class="sns-btn admin-only" style="margin-top:.6rem;width:100%" onclick="resetYT()">変更</button>`;
 }
+
+async function embedYoutube() {
+  const url = document.getElementById('yt-url').value.trim();
+  if (!url) return;
+  const m = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (!m) { alert('正しいYouTube URLを入力してください'); return; }
+  showLoading(true);
+  try {
+    await SB.setSNS('youtube', url);
+    applyYoutube(url);
+    showToast('YouTubeを保存しました ✓');
+  } catch(e) { showToast('保存に失敗しました', 'error'); }
+  showLoading(false);
+}
+
 function resetYT() {
   document.getElementById('yt-embed-area').innerHTML = `
-    <div class="sns-input-row admin-only"><input class="sns-input" id="yt-url" placeholder="YouTube動画URLを貼り付け" /><button class="sns-btn" onclick="embedYoutube()">埋め込み</button></div>
+    <div class="sns-input-row admin-only">
+      <input class="sns-input" id="yt-url" placeholder="YouTube動画URLを貼り付け" />
+      <button class="sns-btn" onclick="embedYoutube()">保存</button>
+    </div>
     <p class="sns-ph viewer-only">動画未設定</p>`;
 }
 
-function embedSpotify() {
-  const input = document.getElementById('sp-url').value.trim();
-  if (!input) return;
+/* ── Spotify ── */
+function applySpotify(url) {
+  const embedUrl = url.replace('open.spotify.com/', 'open.spotify.com/embed/');
   document.getElementById('sp-embed-area').innerHTML = `
     <iframe class="sns-embed-frame" height="152"
-      src="${input.replace('open.spotify.com/', 'open.spotify.com/embed/')}"
+      src="${embedUrl}"
       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
     <button class="sns-btn admin-only" style="margin-top:.6rem;width:100%" onclick="resetSP()">変更</button>`;
 }
+
+async function embedSpotify() {
+  const url = document.getElementById('sp-url').value.trim();
+  if (!url) return;
+  showLoading(true);
+  try {
+    await SB.setSNS('spotify', url);
+    applySpotify(url);
+    showToast('Spotifyを保存しました ✓');
+  } catch(e) { showToast('保存に失敗しました', 'error'); }
+  showLoading(false);
+}
+
 function resetSP() {
   document.getElementById('sp-embed-area').innerHTML = `
-    <div class="sns-input-row admin-only"><input class="sns-input" id="sp-url" placeholder="Spotify トラック/アルバムURL" /><button class="sns-btn" onclick="embedSpotify()">埋め込み</button></div>
+    <div class="sns-input-row admin-only">
+      <input class="sns-input" id="sp-url" placeholder="Spotify トラック/アルバムURL" />
+      <button class="sns-btn" onclick="embedSpotify()">保存</button>
+    </div>
     <p class="sns-ph viewer-only">楽曲未設定</p>`;
 }
 
-function openSNS(inputId) {
+/* ── 外部リンク（Instagram / X / TikTok） ── */
+const SNS_KEY_MAP = { 'ig-url': 'instagram', 'tw-url': 'twitter', 'tt-url': 'tiktok' };
+const SNS_LABEL   = { 'ig-url': 'Instagram', 'tw-url': 'X',       'tt-url': 'TikTok'  };
+
+function applyExternalLink(prefix, url) {
+  // 閲覧者向けにリンクボタンを表示
+  const body = document.querySelector(`#${prefix}-link-area`);
+  if (!body) return;
+  body.innerHTML = `
+    <a href="${url.startsWith('http') ? url : 'https://'+url}"
+       target="_blank" rel="noopener"
+       class="sns-link-btn viewer-only">${SNS_LABEL[prefix+'-url'] ?? prefix} を開く →</a>
+    <div class="sns-input-row admin-only">
+      <input class="sns-input" id="${prefix}-url" value="${url}" placeholder="URL" />
+      <button class="sns-btn" onclick="saveSNS('${prefix}-url')">保存</button>
+    </div>`;
+}
+
+async function saveSNS(inputId) {
   const url = document.getElementById(inputId)?.value.trim();
   if (!url) { alert('URLを入力してください'); return; }
-  window.open(url.startsWith('http') ? url : 'https://' + url, '_blank', 'noopener');
+  const key = SNS_KEY_MAP[inputId];
+  showLoading(true);
+  try {
+    await SB.setSNS(key, url);
+    const prefix = inputId.replace('-url','');
+    applyExternalLink(prefix, url);
+    showToast(`${SNS_LABEL[inputId]}を保存しました ✓`);
+  } catch(e) { showToast('保存に失敗しました', 'error'); }
+  showLoading(false);
+}
+
+// 後方互換：旧 openSNS はそのまま残す
+function openSNS(inputId) {
+  saveSNS(inputId);
 }

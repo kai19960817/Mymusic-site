@@ -320,6 +320,13 @@ section { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
 .sns-btn { background: var(--accent2); border: none; border-radius: 8px; color: #fff; font-family: inherit; font-size: .7rem; padding: .6rem 1rem; cursor: pointer; letter-spacing: .08em; transition: background .2s; }
 .sns-btn:hover { background: var(--accent); color: #0a0a0f; }
 .sns-ph { font-size: .75rem; color: var(--muted); }
+.sns-link-btn {
+  display: inline-block; margin-top: .2rem;
+  font-size: .78rem; color: var(--accent2);
+  text-decoration: none; letter-spacing: .04em;
+  transition: color .2s;
+}
+.sns-link-btn:hover { color: var(--accent); }
 
 /* 閲覧者/管理者モード制御 */
 .admin-only { display: none; }

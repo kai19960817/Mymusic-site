@@ -11,7 +11,7 @@
 <body>
 
 <!-- ══════════════════════════════════════
-    🌐 MAIN SITE（直接表示）
+     🌐 MAIN SITE（直接表示）
 ══════════════════════════════════════ -->
 <div id="screen-site" class="screen active">
 
@@ -34,8 +34,8 @@
       <div class="hero-bg-gradient"></div>
     </div>
     <p class="hero-label">Tokyo</p>
-    <h1>Chill Pop<em> Music</em></h1>
-    <p class="hero-sub"></p>
+    <h1>Your <em>Sound</em></h1>
+    <p class="hero-sub">アーティスト名と自己紹介文をここに入力してください。</p>
     <div class="hero-cta">
       <a href="#gallery" class="btn btn-primary">Listen Now</a>
       <a href="#social" class="btn btn-ghost">Follow Me</a>
@@ -60,7 +60,7 @@
   <!-- ══════════ SNS ══════════ -->
   <section id="social">
     <p class="section-label">Connect</p>
-    <h2 class="section-title">SNS and Links</h2>
+    <h2 class="section-title">SNS & Links</h2>
     <div class="sns-grid">
 
       <div class="sns-card">
@@ -79,8 +79,8 @@
           <span class="sns-icon ig"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.3.2 4.8 1.7 5 5 .1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.2 3.3-1.7 4.8-5 5-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-3.3-.2-4.8-1.7-5-5C2 16.6 2 16.2 2 12s0-3.6.1-4.9c.2-3.3 1.7-4.8 5-5C8.4 2.2 8.8 2.2 12 2.2zm0-2.2C8.7 0 8.3 0 7 .1 2.7.3.3 2.7.1 7 0 8.3 0 8.7 0 12c0 3.3 0 3.7.1 5 .2 4.3 2.6 6.7 7 6.9 1.3.1 1.7.1 5 .1 3.3 0 3.7 0 5-.1 4.3-.2 6.7-2.6 6.9-7 .1-1.3.1-1.7.1-5 0-3.3 0-3.7-.1-5-.2-4.3-2.6-6.7-7-6.9C15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.8a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8z"/></svg></span>
           <span class="sns-card-name">Instagram</span>
         </div>
-        <div class="sns-card-body">
-          <div class="sns-input-row admin-only"><input class="sns-input" id="ig-url" placeholder="Instagram URL" /><button class="sns-btn" onclick="openSNS('ig-url')">開く</button></div>
+        <div class="sns-card-body" id="ig-link-area">
+          <div class="sns-input-row admin-only"><input class="sns-input" id="ig-url" placeholder="Instagram URL" /><button class="sns-btn" onclick="saveSNS('ig-url')">保存</button></div>
           <p class="sns-ph viewer-only">リンク未設定</p>
         </div>
       </div>
@@ -91,7 +91,7 @@
           <span class="sns-card-name">Spotify</span>
         </div>
         <div class="sns-card-body" id="sp-embed-area">
-          <div class="sns-input-row admin-only"><input class="sns-input" id="sp-url" placeholder="Spotify URL" /><button class="sns-btn" onclick="embedSpotify()">埋め込み</button></div>
+          <div class="sns-input-row admin-only"><input class="sns-input" id="sp-url" placeholder="Spotify URL" /><button class="sns-btn" onclick="embedSpotify()">保存</button></div>
           <p class="sns-ph viewer-only">楽曲未設定</p>
         </div>
       </div>
@@ -101,8 +101,8 @@
           <span class="sns-icon tw"><svg viewBox="0 0 24 24"><path d="M18.3 1.4h3.4l-7.4 8.5 8.7 11.7H15l-5.3-7-6.1 7H0.2l7.9-9L0 1.4h7.4l4.8 6.4 5.7-6.4zm-1.2 18h1.9L7 3.4H4.9l12.2 16z"/></svg></span>
           <span class="sns-card-name">X (Twitter)</span>
         </div>
-        <div class="sns-card-body">
-          <div class="sns-input-row admin-only"><input class="sns-input" id="tw-url" placeholder="X URL" /><button class="sns-btn" onclick="openSNS('tw-url')">開く</button></div>
+        <div class="sns-card-body" id="tw-link-area">
+          <div class="sns-input-row admin-only"><input class="sns-input" id="tw-url" placeholder="X URL" /><button class="sns-btn" onclick="saveSNS('tw-url')">保存</button></div>
           <p class="sns-ph viewer-only">リンク未設定</p>
         </div>
       </div>
@@ -115,8 +115,8 @@
           </span>
           <span class="sns-card-name">TikTok</span>
         </div>
-        <div class="sns-card-body">
-          <div class="sns-input-row admin-only"><input class="sns-input" id="tt-url" placeholder="TikTok プロフィールURL" /><button class="sns-btn" onclick="openSNS('tt-url')">開く</button></div>
+        <div class="sns-card-body" id="tt-link-area">
+          <div class="sns-input-row admin-only"><input class="sns-input" id="tt-url" placeholder="TikTok プロフィールURL" /><button class="sns-btn" onclick="saveSNS('tt-url')">保存</button></div>
           <p class="sns-ph viewer-only">リンク未設定</p>
         </div>
       </div>
@@ -127,7 +127,7 @@
   <section id="contact" style="text-align:center;max-width:560px">
     <p class="section-label">Get in Touch</p>
     <h2 class="section-title">Contact</h2>
-    <p style="color:var(--muted);font-size:.85rem;line-height:1.7;margin-bottom:1.5rem;">コラボレーションのご依頼はこちらから。</p>
+    <p style="color:var(--muted);font-size:.85rem;line-height:1.7;margin-bottom:1.5rem;">コラボレーション・ライブのご依頼はこちらから。</p>
     <a href="mailto:kaifarronclaire@gmail.com" class="btn btn-primary">メールを送る</a>
   </section>
 
